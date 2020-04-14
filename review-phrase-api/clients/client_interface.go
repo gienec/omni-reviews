@@ -1,5 +1,10 @@
 package clients
 
+import (
+	"go.mongodb.org/mongo-driver/mongo"
+	"phrase-api/models"
+)
+
 type IClient interface {
-	Get(limit int, filter interface{}) []interface{}
+	Get(paging *models.Paging, sort *models.Sort) *mongo.Cursor
 }

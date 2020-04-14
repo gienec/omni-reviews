@@ -12,39 +12,55 @@ type PhraseHandler struct {
 	Repository repositories.IRepository
 }
 
-func (phraseHandler PhraseHandler) Handle(context *gin.Context) {
-	paging := phraseHandler.getPaging(context)
-	sort := phraseHandler.getSort(context)
-	phrases := phraseHandler.Repository.GetPhraseStatsList(paging, sort)
+func NewPhraseHandler(repository repositories.IRepository) *PhraseHandler {
+	return &PhraseHandler{Repository: repository}
+}
+
+func (self *PhraseHandler) Handle(context *gin.Context) {
+	paging := self.getPaging(context)
+	sort := self.getSort(context)
+	phrases := self.Repository.GetPhraseStatsList(paging, sort)
 
 	context.JSON(http.StatusOK, phrases)
 }
 
-func (phraseHandler PhraseHandler) getPaging(context *gin.Context) models.Paging {
-	return models.Paging {
-		Offset: phraseHandler.getPathInt(context, "offset", 0),
-		Limit:  phraseHandler.getPathInt(context, "limit", 0),
+func (self *PhraseHandler) getPaging(context *gin.Context) *models.Paging {
+	return &models.Paging {
+		Offset: self.getPathInt(context, "offset", 0),
+		Limit:  self.getPathInt(context, "limit", 10),
 	}
 }
 
-func (phraseHandler PhraseHandler) getSort(context *gin.Context) models.Sort {
-	fieldName := context.Params.ByName("sortBy")
-	order := context.Params.ByName("order")
+func (self *PhraseHandler) getSort(context *gin.Context) *models.Sort {
+	fieldName := context.Query("sortBy")
+	order := context.Query("order")
 
-	return models.Sort {
-		FieldName: fieldName,
-		Order:  order,
+	var sort *models.Sort
+
+	if fieldName != "" && order != "" {
+		sort = &models.Sort {
+			FieldName: fieldName,
+			Order:  order,
+		}
+	} else {
+		return nil
 	}
+
+	return sort
 }
 
-func (phraseHandler PhraseHandler) getPathInt(context *gin.Context, name string, defaultValue int) int {
-	var result int
+func (self PhraseHandler) getPathInt(context *gin.Context, name string, defaultValue int64) int64 {
+	var result int64
 
-	value := context.Params.ByName(name)
+	value := context.Query(name)
 	if value == "" {
 		result = defaultValue
 	} else {
-		result, _ = strconv.Atoi(value)
+		result, _ = strconv.ParseInt(value, 10, 64)
+	}
+
+	if result < 0 {
+		result = defaultValue
 	}
 
 	return result

@@ -2,7 +2,10 @@ package clients
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"phrase-api/models"
 )
 
 type MongoClient struct {
@@ -15,10 +18,21 @@ func NewMongoClient(phraseCollection *mongo.Collection) *MongoClient {
 	}
 }
 
-func (self *MongoClient) Get(limit int, filter interface{}) []interface{} {
-	cursor, _ := self.phraseCollection.Find(context.Background())
+func (self *MongoClient) Get(paging *models.Paging, sort *models.Sort) *mongo.Cursor {
+	options := options.Find()
 
-	var result []interface{}
+	if sort != nil {
+		var order int
+		if order = 1; sort.Order == "desc" {
+			order = -1
+		}
 
-	return result
+		options.SetSort(bson.D{{sort.FieldName,order}})
+	}
+
+	options.SetSkip(paging.Offset)
+	options.SetLimit(paging.Limit)
+
+	cursor, _ := self.phraseCollection.Find(context.Background(), bson.D{}, options)
+	return cursor
 }

@@ -30,9 +30,7 @@ func main() {
 }
 
 func getPhraseHandler() handlers.IHandler {
-	return handlers.PhraseHandler{
-		Repository: getRepository(),
-	}
+	return handlers.NewPhraseHandler(getRepository())
 }
 
 func getRepository() repositories.IRepository {
@@ -41,7 +39,7 @@ func getRepository() repositories.IRepository {
 
 func getClient() clients.IClient {
 	return clients.NewMongoClient(GetCollection(
-		"mongodb+srv://omni:<password>@omnicomments-t1xlh.mongodb.net?retryWrites=true&w=majority",
+		"mongodb+srv://omni:<password>@omnicomments-t1xlh.mongodb.net/test?retryWrites=true&w=majority",
 		"omni",
 		"phrases"))
 }
