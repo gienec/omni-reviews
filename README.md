@@ -9,5 +9,5 @@
 * run command `go run main.go`
 ### Review Phrase API
 * go to directory `review-phrase-api`
-* change MongoDB connection to valid one
-* run command `go run main.go` in `main.go`
+* change MongoDB connection to valid one in `main.go`
+* run command `go run main.go`
